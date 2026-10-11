@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RemoteTerm – inloggen</title>
+<style>
+ body{font-family:-apple-system,system-ui,sans-serif;background:#10223a;color:#fff;
+      display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+ form{background:#1b3556;padding:24px;border-radius:12px;width:min(320px,90vw)}
+ h1{font-size:20px;margin:0 0 16px}
+ label{display:block;font-size:14px;margin:12px 0 4px}
+ input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;font-size:16px}
+ button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:8px;
+        background:#2bb3c0;color:#000;font-size:16px;font-weight:600}
+ .fout{color:#ffb3b3;font-size:14px;display:none}
+</style></head><body>
+<form method="post" action="/rt-login/dologin">
+ <h1>RemoteTerm</h1>
+ <p class="fout" id="fout">Onjuiste gebruikersnaam of wachtwoord.</p>
+ <label for="u">Gebruikersnaam</label>
+ <input id="u" name="httpd_username" autocomplete="username" autocapitalize="none" required>
+ <label for="p">Wachtwoord</label>
+ <input id="p" name="httpd_password" type="password" autocomplete="current-password" required>
+ <button type="submit">Inloggen</button>
+</form>
+<script>if(location.search.includes('fout'))document.getElementById('fout').style.display='block';</script>
+</body></html>

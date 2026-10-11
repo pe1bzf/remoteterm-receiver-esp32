@@ -1,0 +1,73 @@
+<VirtualHost *:443>
+    # Vervang door je eigen publieke IP-adres of hostnaam
+    ServerName 203.0.113.10
+    KeepAliveTimeout 30
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/remoteterm/remoteterm.crt
+    SSLCertificateKeyFile /etc/ssl/remoteterm/remoteterm.key
+
+    # Sessie-cookie: versleuteld, 90 dagen, verlengt zich bij gebruik
+    SessionCookieName rt_session path=/;Secure;HttpOnly;SameSite=Lax
+    SessionCryptoPassphraseFile /etc/apache2/remoteterm-session.key
+    SessionMaxAge 7776000
+    SessionExpiryUpdateInterval 3600
+
+    # Inlogscherm wordt door Apache zelf geserveerd
+    ProxyPass /rt-login/ !
+    Alias /rt-login/ /var/www/remoteterm-login/
+    <Directory /var/www/remoteterm-login>
+        Require all granted
+    </Directory>
+
+    <Location />
+        <If "%{HTTP_USER_AGENT} == 'ESP32HTTPClient'">
+            # Display (ESP32): Basic Auth
+            AuthType Basic
+            AuthName "RemoteTerm"
+            AuthBasicProvider file
+            AuthUserFile /etc/apache2/remoteterm.htpasswd
+        </If>
+        <Else>
+            # Browsers: inlogformulier + cookie
+            AuthType form
+            AuthName "RemoteTerm"
+            AuthFormProvider file
+            AuthUserFile /etc/apache2/remoteterm.htpasswd
+            AuthFormLoginRequiredLocation "/rt-login/index.html"
+            Session On
+        </Else>
+        Require valid-user
+    </Location>
+
+    <Location /rt-login/>
+        AuthType None
+        Require all granted
+    </Location>
+
+    <Location /rt-login/dologin>
+        SetHandler form-login-handler
+        AuthType form
+        AuthName "RemoteTerm"
+        AuthFormProvider file
+        AuthUserFile /etc/apache2/remoteterm.htpasswd
+        AuthFormLoginRequiredLocation "/rt-login/index.html?fout=1"
+        AuthFormLoginSuccessLocation "/"
+        Session On
+    </Location>
+
+    <Location /rt-login/logout>
+        SetHandler form-logout-handler
+        AuthFormLogoutLocation "/rt-login/index.html"
+        Session On
+        SessionMaxAge 1
+    </Location>
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://127.0.0.1:8000/ upgrade=websocket ttl=4
+    ProxyPassReverse / http://127.0.0.1:8000/
+
+    ErrorLog  ${APACHE_LOG_DIR}/remoteterm_error.log
+    CustomLog ${APACHE_LOG_DIR}/remoteterm_access.log combined
+</VirtualHost>

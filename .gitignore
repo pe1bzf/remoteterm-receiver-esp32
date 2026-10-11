@@ -1,0 +1,6 @@
+# Echte secrets nooit committen
+libraries/RemoteTermSecrets/remoteterm_secrets.h
+remoteterm_secrets.h
+*.key
+*.htpasswd
+.DS_Store
